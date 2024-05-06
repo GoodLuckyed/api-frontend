@@ -46,13 +46,19 @@ declare namespace API {
     id?: number;
   };
 
+  type IdRequest = {
+    id?: number;
+  };
+
   type InterfaceInfo = {
+    avatarUrl?: string;
     createTime?: string;
     description?: string;
     id?: number;
     isDelete?: number;
     method?: string;
     name?: string;
+    reduceScore?: number;
     requestExample?: string;
     requestHeader?: string;
     requestParams?: string;
@@ -60,6 +66,7 @@ declare namespace API {
     responseParams?: string;
     returnFormat?: string;
     status?: number;
+    totalInvokes?: number;
     updateTime?: string;
     url?: string;
     userId?: number;
@@ -94,6 +101,14 @@ declare namespace API {
     status?: number;
     url?: string;
     userId?: number;
+  };
+
+  type listInterfaceInfoBySearchTextPageUsingGETParams = {
+    current?: number;
+    pageSize?: number;
+    searchText?: string;
+    sortField?: string;
+    sortOrder?: string;
   };
 
   type listInterfaceInfoUsingGETParams = {
