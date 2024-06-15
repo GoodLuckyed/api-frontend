@@ -23,6 +23,12 @@ declare namespace API {
     message?: string;
   };
 
+  type BaseResponseobject = {
+    code?: number;
+    data?: Record<string, any>;
+    message?: string;
+  };
+
   type BaseResponsePageInterfaceInfo = {
     code?: number;
     data?: PageInterfaceInfo;
@@ -39,6 +45,11 @@ declare namespace API {
     code?: number;
     data?: UserVo;
     message?: string;
+  };
+
+  type Field = {
+    fieldName?: string;
+    value?: string;
   };
 
   type getInterfaceInfoUsingGETParams = {
@@ -83,6 +94,12 @@ declare namespace API {
     responseParams?: ResponseParamsField[];
     returnFormat?: string;
     url?: string;
+  };
+
+  type InvokeRequest = {
+    id?: number;
+    requestParams?: Field[];
+    userRequestParams?: string;
   };
 
   type listInterfaceInfoByPageUsingGETParams = {

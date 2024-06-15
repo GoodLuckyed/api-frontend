@@ -1,13 +1,16 @@
 import React, {useEffect, useState} from "react";
-import {Badge, Card, Descriptions, message, Spin, Tag} from "antd";
-import {useParams} from "@@/exports";
-import {getInterfaceInfoUsingGet} from "@/services/api-backend/interfaceInfoController";
+import {Badge, Card, Descriptions, Form, message, Spin, Tag} from "antd";
+import {history, useModel, useParams} from "@@/exports";
+import {getInterfaceInfoUsingGet, invokeInterfaceUsingPost} from "@/services/api-backend/interfaceInfoController";
 import Paragraph from "antd/lib/typography/Paragraph";
 import {InterfaceRequestMethodEnum, InterfaceStatusEnum} from "@/enum/commonEnum";
 import './index.less'
 import {BugOutlined, CodeOutlined, FileExclamationOutlined, FileTextOutlined} from "@ant-design/icons";
 import ApiTab from "@/pages/InterfaceInfo/components/ApiTab";
 import {returnExample} from "@/pages/InterfaceInfo/components/CodeTemplate";
+import ToolsTab from "@/pages/InterfaceInfo/components/ToolsTab";
+import {stringify} from "querystring";
+
 
 
 const InterfaceInfo: React.FC = () => {
@@ -19,6 +22,15 @@ const InterfaceInfo: React.FC = () => {
   const [responseParams,setResponseParams] = useState([])
   const [activeTabKey, setActiveTabKey] = useState<'api'|'tools'|'errorCode'|'sampleCode'|string>('api')
   const [returnCode, setReturnCode] = useState<any>(returnExample)
+  const [form] = Form.useForm()
+  const [temporaryParams,setTemporaryParams] = useState<any>();
+  const [result,setResult] = useState<string>()
+  const [resultLoading,setResultLoading] = useState<boolean>(false)
+  const [requestExampleActiveTabKey,setRequestExampleActiveTabKey] = useState<string>('javadoc')
+  const {initialState} = useModel('@@initialState')
+  const {loginUser} = initialState || {}
+  const {search,pathname} = window.location;
+
 
   const loadData = async () => {
     if (!params.id){
@@ -29,7 +41,7 @@ const InterfaceInfo: React.FC = () => {
     try { //@ts-ignore
       const res = await getInterfaceInfoUsingGet({id: params.id})
       if (res.data && res.code === 0) {
-        setData(res.data)
+        setData(res.data || {})
         setTotalInvokes(res.data.totalInvokes || 0)
         let requestParams = res.data.requestParams;
         let responseParams = res.data.responseParams;
@@ -54,6 +66,29 @@ const InterfaceInfo: React.FC = () => {
   //页签切换的回调
   const responseExampleTabChange = (key:string) => {
     setActiveTabKey(key)
+  }
+
+  // 在线调用
+  const onSearch = async (values:any) => {
+    // 判断是否登录 未登录则跳转到登录页
+    if (!loginUser){
+      history.replace({
+        pathname: '/user/login',
+        search: stringify({
+          redirect: pathname + search
+        })
+      })
+    }
+    setResultLoading(true)
+    const res = await invokeInterfaceUsingPost({
+      id: data?.id,
+      ...values
+    })
+    if (res.code === 0){
+      setTotalInvokes(Number(totalInvokes + 1))
+    }
+    setResult(JSON.stringify(res,null,4))
+    setResultLoading(false)
   }
 
   const responseExampleTabList = [
@@ -84,8 +119,22 @@ const InterfaceInfo: React.FC = () => {
         responseParams={responseParams}
         returnCode={returnCode}
       >
+      </ApiTab>,
+    tools:
+      <ToolsTab
+        data={data}
+        form={form}
+        temporaryParams={temporaryParams}
+        paramsTableChange={(e:any) => {
+          setTemporaryParams(e)
+        }}
+        onSearch={onSearch}
+        result={result}
+        resultLoading={resultLoading}
+        requestExampleActiveTabKey={requestExampleActiveTabKey}
+      >
 
-      </ApiTab>
+      </ToolsTab>
   }
 
   return (
