@@ -1,15 +1,29 @@
 import React, {useEffect, useState} from "react";
-import {Badge, Card, Descriptions, Form, message, Spin, Tag} from "antd";
+import {Badge, Card, Descriptions, Form, message, Spin, Table, Tabs, Tag} from "antd";
 import {history, useModel, useParams} from "@@/exports";
 import {getInterfaceInfoUsingGet, invokeInterfaceUsingPost} from "@/services/api-backend/interfaceInfoController";
 import Paragraph from "antd/lib/typography/Paragraph";
-import {InterfaceRequestMethodEnum, InterfaceStatusEnum} from "@/enum/commonEnum";
+import {errorcode, InterfaceRequestMethodEnum, InterfaceStatusEnum} from "@/enum/commonEnum";
 import './index.less'
-import {BugOutlined, CodeOutlined, FileExclamationOutlined, FileTextOutlined} from "@ant-design/icons";
+import {
+  BugOutlined,
+  CodeOutlined,
+  FileExclamationOutlined,
+  FileTextOutlined,
+  JavaOutlined,
+  JavaScriptOutlined
+} from "@ant-design/icons";
 import ApiTab from "@/pages/InterfaceInfo/components/ApiTab";
-import {returnExample} from "@/pages/InterfaceInfo/components/CodeTemplate";
+import {
+  axiosExample,
+  convertResponseParams, javaExample,
+  requestParameters,
+  returnExample
+} from "@/pages/InterfaceInfo/components/CodeTemplate";
 import ToolsTab from "@/pages/InterfaceInfo/components/ToolsTab";
 import {stringify} from "querystring";
+import {Column} from "rc-table";
+import CodeHighlighting from "@/components/CodeHighlighting/CodeHighlighting";
 
 
 
@@ -30,6 +44,8 @@ const InterfaceInfo: React.FC = () => {
   const {initialState} = useModel('@@initialState')
   const {loginUser} = initialState || {}
   const {search,pathname} = window.location;
+  const [javaCode,setJavaCode] = useState<any>();
+  const [axiosCodeo,setAxiosCode] = useState<any>();
 
 
   const loadData = async () => {
@@ -52,6 +68,11 @@ const InterfaceInfo: React.FC = () => {
           setRequestParams([])
           setResponseParams([])
         }
+        const response = res.data.responseParams ? JSON.parse(res.data.responseParams) : [] as API.ResponseParamsField
+        const convertedParams = convertResponseParams(response)
+        setAxiosCode(axiosExample(res.data?.url,res.data?.method?.toLowerCase()))
+        setJavaCode(javaExample(res.data?.url,res.data?.method?.toUpperCase()))
+        setReturnCode(convertedParams)
       }
       setLoading(false)
     } catch (e:any) {
@@ -110,7 +131,7 @@ const InterfaceInfo: React.FC = () => {
     }
   ]
 
-  const responseExampleContentList:Record<string, React.ReactNode> = {
+  const responseExampleContentList: Record<string, React.ReactNode> = {
     api:
       <ApiTab
         sampleCodeTab={() => setActiveTabKey('sampleCode')}
@@ -125,52 +146,106 @@ const InterfaceInfo: React.FC = () => {
         data={data}
         form={form}
         temporaryParams={temporaryParams}
-        paramsTableChange={(e:any) => {
-          setTemporaryParams(e)
+        paramsTableChange={(e: any) => {
+          setTemporaryParams(e);
         }}
         onSearch={onSearch}
         result={result}
         resultLoading={resultLoading}
         requestExampleActiveTabKey={requestExampleActiveTabKey}
       >
-
-      </ToolsTab>
-  }
+      </ToolsTab>,
+    errorCode: (
+      <>
+        <p className={'highlightLine'}>错误码</p>
+        <Table dataSource={errorcode} pagination={false} size={'small'} style={{ maxWidth: 800 }}>
+          <Column title="参数名称" dataIndex="name" key="name" />
+          <Column title="错误码" dataIndex="code" key="code" />
+          <Column title="描述" dataIndex="desc" key="desc" />
+        </Table>
+      </>
+    ),
+    sampleCode:
+      <>
+        <Tabs
+          defaultActiveKey="javadoc"
+          centered
+          items={[
+            {
+              key: 'javadoc',
+              label: 'java',
+              children: <CodeHighlighting codeString={javaCode} language={'java'}></CodeHighlighting>,
+              icon: <JavaOutlined />
+            },
+            {
+              key: 'javascript',
+              label: 'axios',
+              children: <CodeHighlighting codeString={axiosCodeo} language={'javascript'}></CodeHighlighting>,
+              icon: <JavaScriptOutlined />
+            }
+          ]}
+        />
+      </>
+  };
 
   return (
     <Spin spinning={loading}>
-      <div style={{margin:'0 100px'}}>
-      <Card title={data?.name}>
-        <Descriptions>
-          <Descriptions.Item key={'url'} label={'接口地址'}><Paragraph copyable>{data?.url}</Paragraph></Descriptions.Item>
-          <Descriptions.Item key={'returnFormat'} label={'返回格式'}>{data?.returnFormat}</Descriptions.Item>
-          <Descriptions.Item key={'reduceScore'} label={'消耗积分'}>{data?.reduceScore}</Descriptions.Item>
-          <Descriptions.Item key={'method'} label={'请求方式'}><Tag color={InterfaceRequestMethodEnum[data?.method ?? 'default']}>{data?.method}</Tag></Descriptions.Item>
-          <Descriptions.Item key={'totalInvokes'} label={'总调用次数'}>{totalInvokes}次</Descriptions.Item>
-          <Descriptions.Item key={'status'} label={'接口状态'}>
-            {data && data.status === 0 ?(  <Badge status="error" text={InterfaceStatusEnum[data.status]} />) : null}
-            {data && data.status === 1 ?(  <Badge status="success" text={InterfaceStatusEnum[data.status]} />) : null}
-            {data && data.status === 2 ?(  <Badge status="processing" text={InterfaceStatusEnum[data.status]} />) : null}
-          </Descriptions.Item>
-          <Descriptions.Item key={'description'} label={'接口描述'}>{data?.description ?? '该接口暂无描述信息'}</Descriptions.Item>
-          <Descriptions.Item key={'requestExample'} label={'请求示例'}><Paragraph copyable>{data?.requestExample}</Paragraph></Descriptions.Item>
-        </Descriptions>
-      </Card>
-      <Card>
-        <p className='highlightLine'>接口详细描述请前往开发者在线文档查看：</p>
-        <a href={'https://www.baidu.com'} target={'_blank'} rel={'noreferrer'}>📘接口在线文档：{data?.name}</a>
-      </Card>
-      <br/>
-      <Card
-        style={{ width: '100%' }}
-        tabList={responseExampleTabList}
-        activeTabKey={activeTabKey}
-        onTabChange={responseExampleTabChange}
-      >
-        {responseExampleContentList[activeTabKey]}
-      </Card>
+      <div style={{ margin: '0 100px' }}>
+        <Card title={data?.name}>
+          <Descriptions>
+            <Descriptions.Item key={'url'} label={'接口地址'}>
+              <Paragraph copyable>{data?.url}</Paragraph>
+            </Descriptions.Item>
+            <Descriptions.Item key={'returnFormat'} label={'返回格式'}>
+              {data?.returnFormat}
+            </Descriptions.Item>
+            <Descriptions.Item key={'reduceScore'} label={'消耗积分'}>
+              {data?.reduceScore}
+            </Descriptions.Item>
+            <Descriptions.Item key={'method'} label={'请求方式'}>
+              <Tag color={InterfaceRequestMethodEnum[data?.method ?? 'default']}>
+                {data?.method}
+              </Tag>
+            </Descriptions.Item>
+            <Descriptions.Item key={'totalInvokes'} label={'总调用次数'}>
+              {totalInvokes}次
+            </Descriptions.Item>
+            <Descriptions.Item key={'status'} label={'接口状态'}>
+              {data && data.status === 0 ? (
+                <Badge status="error" text={InterfaceStatusEnum[data.status]} />
+              ) : null}
+              {data && data.status === 1 ? (
+                <Badge status="success" text={InterfaceStatusEnum[data.status]} />
+              ) : null}
+              {data && data.status === 2 ? (
+                <Badge status="processing" text={InterfaceStatusEnum[data.status]} />
+              ) : null}
+            </Descriptions.Item>
+            <Descriptions.Item key={'description'} label={'接口描述'}>
+              {data?.description ?? '该接口暂无描述信息'}
+            </Descriptions.Item>
+            <Descriptions.Item key={'requestExample'} label={'请求示例'}>
+              <Paragraph copyable>{data?.requestExample}</Paragraph>
+            </Descriptions.Item>
+          </Descriptions>
+        </Card>
+        <Card>
+          <p className="highlightLine">接口详细描述请前往开发者在线文档查看：</p>
+          <a href={'https://www.baidu.com'} target={'_blank'} rel={'noreferrer'}>
+            📘接口在线文档：{data?.name}
+          </a>
+        </Card>
+        <br />
+        <Card
+          style={{ width: '100%' }}
+          tabList={responseExampleTabList}
+          activeTabKey={activeTabKey}
+          onTabChange={responseExampleTabChange}
+        >
+          {responseExampleContentList[activeTabKey]}
+        </Card>
       </div>
     </Spin>
-  )
+  );
 }
 export default InterfaceInfo;
