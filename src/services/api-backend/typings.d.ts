@@ -47,6 +47,10 @@ declare namespace API {
     message?: string;
   };
 
+  type DeleteRequest = {
+    id?: number;
+  };
+
   type Field = {
     fieldName?: string;
     value?: string;
@@ -87,6 +91,7 @@ declare namespace API {
     description?: string;
     method?: string;
     name?: string;
+    reduceScore?: number;
     requestExample?: string;
     requestHeader?: string;
     requestParams?: RequestParamsField[];
@@ -195,6 +200,7 @@ declare namespace API {
   type UserVo = {
     accessKey?: string;
     avatarUrl?: string;
+    balance?: number;
     createTime?: string;
     gender?: number;
     id?: number;

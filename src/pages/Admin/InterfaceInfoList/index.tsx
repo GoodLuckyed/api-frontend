@@ -11,11 +11,16 @@ import {
   ProTable,
 } from '@ant-design/pro-components';
 import '@umijs/max';
-import { Button, Drawer, Input, message } from 'antd';
+import {Button, Drawer, Input, message, Popconfirm} from 'antd';
 import React, { useRef, useState } from 'react';
-import type { FormValueType } from './UpdateForm';
-import UpdateForm from './UpdateForm';
-import {listInterfaceInfoByPageUsingGet} from "@/services/api-backend/interfaceInfoController";
+import type { FormValueType } from '../UpdateForm';
+import UpdateForm from '../UpdateForm';
+import {
+  delInterfaceInfoUsingPost,
+  listInterfaceInfoByPageUsingGet, offlineInterfaceInfoUsingPost,
+  onlineInterfaceInfoUsingPost
+} from "@/services/api-backend/interfaceInfoController";
+import InterfaceInfoColumns from "@/pages/Admin/Columns/InterfaceInfoColumns";
 
 /**
  * @en-US Add node
@@ -62,29 +67,7 @@ const handleUpdate = async (fields: FormValueType) => {
   }
 };
 
-/**
- *  Delete node
- * @zh-CN 删除节点
- *
- * @param selectedRows
- */
-const handleRemove = async (selectedRows: API.RuleListItem[]) => {
-  const hide = message.loading('正在删除');
-  if (!selectedRows) return true;
-  try {
-    await removeRule({
-      key: selectedRows.map((row) => row.key),
-    });
-    hide();
-    message.success('Deleted successfully and will refresh soon');
-    return true;
-  } catch (error) {
-    hide();
-    message.error('Delete failed, please try again');
-    return false;
-  }
-};
-const TableList: React.FC = () => {
+const InterfaceInfoList: React.FC = () => {
   /**
    * @en-US Pop-up window of new window
    * @zh-CN 新建窗口的弹窗
@@ -97,90 +80,109 @@ const TableList: React.FC = () => {
   const [updateModalOpen, handleUpdateModalOpen] = useState<boolean>(false);
   const [showDetail, setShowDetail] = useState<boolean>(false);
   const actionRef = useRef<ActionType>();
-  const [currentRow, setCurrentRow] = useState<API.RuleListItem>();
+  const [currentRow, setCurrentRow] = useState<API.InterfaceInfo>();
   const [selectedRowsState, setSelectedRows] = useState<API.RuleListItem[]>([]);
+  const [loading, setLoading] = useState<boolean>(false)
+  const [modalOpen, setModalOpen] = useState<boolean>(false);
+
+  /**
+   *  Delete node
+   * @zh-CN 删除节点
+   *
+   * @param selectedRows
+   */
+  const handleRemove = async (record: API.InterfaceInfo) => {
+    const hide = message.loading('正在删除');
+    if (!record) return true;
+    try {
+      const res = await delInterfaceInfoUsingPost({
+        id: record.id
+      })
+      if (res.data){
+        hide();
+        message.success('删除成功');
+        actionRef.current?.reload();
+      }
+      return true;
+    } catch (error:any) {
+      hide();
+      message.error('删除失败', error.message);
+      return false;
+    }
+  };
+
+  /**
+   * 发布接口
+   * @param record
+   */
+  const handleOnline = async (record: API.IdRequest) => {
+    const hide = message.loading('发布中');
+    if (!record) return true;
+    try {
+      const res = await onlineInterfaceInfoUsingPost({
+        id: record.id
+      })
+      hide();
+      if (res.data) {
+        message.success('发布成功');
+        actionRef.current?.reload();
+      }
+      return true;
+    } catch (error:any) {
+      hide();
+      message.error(error.message)
+      return false;
+    }
+  }
+
+  /**
+   * 下线接口
+   * @param record
+   */
+  const handleOffline = async (record:API.IdRequest) => {
+    const hide = message.loading('下线中');
+    if (!record) return true;
+    try {
+      const res = await offlineInterfaceInfoUsingPost({
+        id: record.id
+      })
+      hide();
+      if (res.data) {
+        message.success('下线成功');
+        actionRef.current?.reload();
+      }
+      return true;
+    } catch (error:any) {
+      hide();
+      message.error(error.message)
+      return false;
+    }
+  }
+
+  // 确认删除
+  const onConfirm = async () => {
+    await handleRemove(currentRow as API.InterfaceInfo)
+  }
+
+  // 取消删除
+  const onCancel = () => {
+    message.warning('已取消删除')
+  }
 
   /**
    * @en-US International configuration
    * @zh-CN 国际化配置
    * */
 
-  const columns: ProColumns<API.RuleListItem>[] = [
-    {
-      title: '接口名称',
-      dataIndex: 'name',
-      valueType: 'text',
-      // tip: 'The rule name is the unique key',
-      // render: (dom, entity) => {
-      //   return (
-      //     <a
-      //       onClick={() => {
-      //         setCurrentRow(entity);
-      //         setShowDetail(true);
-      //       }}
-      //     >
-      //       {dom}
-      //     </a>
-      //   );
-      // },
-    },
-    {
-      title: '描述',
-      dataIndex: 'description',
-      valueType: 'textarea',
-    },
-    {
-      title: '请求方法',
-      dataIndex: 'method',
-      valueType: 'text',
-    },
-    {
-      title: 'url',
-      dataIndex: 'url',
-      valueType: 'text',
-    },
-    {
-      title: '请求头',
-      dataIndex: 'requestHeader',
-      valueType: 'textarea',
-    },
-    {
-      title: '响应头',
-      dataIndex: 'responseHeader',
-      valueType: 'textarea',
-    },
-    {
-      title: '状态',
-      dataIndex: 'status',
-      hideInForm: true,
-      valueEnum: {
-        0: {
-          text: '关闭',
-          status: 'Default',
-        },
-        1: {
-          text: '开启',
-          status: 'Processing',
-        },
-      },
-    },
-    {
-      title: '创建时间',
-      dataIndex: 'createTime',
-      valueType: 'dateTime',
-    },
-    {
-      title: '更新时间',
-      dataIndex: 'updateTime',
-      valueType: 'dateTime',
-    },
+  const columns: ProColumns<API.InterfaceInfo>[] = [
+    ...InterfaceInfoColumns,
     {
       title: '操作',
       dataIndex: 'option',
       valueType: 'option',
       render: (_, record) => [
         <a
-          key="config"
+          key="update"
           onClick={() => {
             handleUpdateModalOpen(true);
             setCurrentRow(record);
@@ -188,15 +190,77 @@ const TableList: React.FC = () => {
         >
           修改
         </a>,
+        record.status === 2 ? (
+          <a
+            key="auditing"
+            type={'text'}
+            onClick={() => {
+              handleOnline(record);
+            }}
+          >
+            审核通过
+          </a>
+        ) : null,
+        record.status === 0 ? (
+          <a
+            key="online"
+            type={'text'}
+            onClick={() => {
+              handleOnline(record);
+            }}
+          >
+            上线
+          </a>
+        ) : null,
+        record.status === 1 ? (
+          <a
+            key="offline"
+            type={'text'}
+            style={{ color: 'red' }}
+            onClick={() => {
+              handleOffline(record);
+            }}
+          >
+            下线
+          </a>
+        ) : null,
+        <Popconfirm
+          key={'delete'}
+          title={'请确认是否删除该接口!'}
+          okText="是"
+          cancelText="否"
+          onConfirm={onConfirm}
+          onCancel={onCancel}
+        >
+          <a
+            key="remove"
+            style={{ color: 'red' }}
+            onClick={async () => {
+              setCurrentRow(record);
+            }}
+          >
+            删除
+          </a>
+        </Popconfirm>,
+        <a
+          key="upload"
+          onClick={async () => {
+            setCurrentRow(record);
+            setModalOpen(true)
+          }}
+        >
+          更新图片
+        </a>,
       ],
     },
   ];
   return (
     <PageContainer>
-      <ProTable<API.RuleListItem, API.PageParams>
-        headerTitle={'查询表格'}
+      <ProTable<API.InterfaceInfo>
+        headerTitle={'接口管理'}
         actionRef={actionRef}
         rowKey="key"
+        loading={loading}
         search={{
           labelWidth: 120,
         }}
@@ -211,56 +275,26 @@ const TableList: React.FC = () => {
             <PlusOutlined /> 新建
           </Button>,
         ]}
-        request={async (params, sort: Record<string, SortOrder>, filter: Record<string, React.ReactText[] | null>) => {
+        request={async (params) => {
           const res = await listInterfaceInfoByPageUsingGet({
-            ...params
-          })
+            ...params,
+          });
           if (res?.data) {
-            return  {
+            return {
               data: res?.data.records || [],
               success: true,
-              total: res.total,
-            }
+              total: res.data.total,
+            };
+          } else {
+            return {
+              data: [],
+              success: false,
+              total: 0,
+            };
           }
         }}
         columns={columns}
-        rowSelection={{
-          onChange: (_, selectedRows) => {
-            setSelectedRows(selectedRows);
-          },
-        }}
       />
-      {selectedRowsState?.length > 0 && (
-        <FooterToolbar
-          extra={
-            <div>
-              已选择{' '}
-              <a
-                style={{
-                  fontWeight: 600,
-                }}
-              >
-                {selectedRowsState.length}
-              </a>{' '}
-              项 &nbsp;&nbsp;
-              <span>
-                服务调用次数总计 {selectedRowsState.reduce((pre, item) => pre + item.callNo!, 0)} 万
-              </span>
-            </div>
-          }
-        >
-          <Button
-            onClick={async () => {
-              await handleRemove(selectedRowsState);
-              setSelectedRows([]);
-              actionRef.current?.reloadAndRest?.();
-            }}
-          >
-            批量删除
-          </Button>
-          <Button type="primary">批量审批</Button>
-        </FooterToolbar>
-      )}
       <ModalForm
         title={'新建规则'}
         width="400px"
@@ -335,4 +369,4 @@ const TableList: React.FC = () => {
     </PageContainer>
   );
 };
-export default TableList;
+export default InterfaceInfoList;

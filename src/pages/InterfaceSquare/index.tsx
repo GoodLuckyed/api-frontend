@@ -28,7 +28,7 @@ const InterfaceSquare: React.FC = () => {
       sortField: 'totalInvokes',
       sortOrder: 'descend'
     });
-    if (res.data){
+    if (res.code === 0 && res.data){
       setData(res.data?.records || [])
       setTotal(res.data?.total)
       setLoading(false)
