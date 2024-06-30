@@ -3,7 +3,6 @@ import { PlusOutlined } from '@ant-design/icons';
 import type { ActionType, ProColumns, ProDescriptionsItemProps } from '@ant-design/pro-components';
 import {
   FooterToolbar,
-  ModalForm,
   PageContainer,
   ProDescriptions,
   ProFormText,
@@ -16,32 +15,13 @@ import React, { useRef, useState } from 'react';
 import type { FormValueType } from '../UpdateForm';
 import UpdateForm from '../UpdateForm';
 import {
+  addInterfaceInfoUsingPost,
   delInterfaceInfoUsingPost,
   listInterfaceInfoByPageUsingGet, offlineInterfaceInfoUsingPost,
   onlineInterfaceInfoUsingPost
 } from "@/services/api-backend/interfaceInfoController";
-import InterfaceInfoColumns from "@/pages/Admin/Columns/InterfaceInfoColumns";
-
-/**
- * @en-US Add node
- * @zh-CN 添加节点
- * @param fields
- */
-const handleAdd = async (fields: API.RuleListItem) => {
-  const hide = message.loading('正在添加');
-  try {
-    await addRule({
-      ...fields,
-    });
-    hide();
-    message.success('Added successfully');
-    return true;
-  } catch (error) {
-    hide();
-    message.error('Adding failed, please try again!');
-    return false;
-  }
-};
+import InterfaceInfoColumns, {InterfaceInfoModalFormColumns} from "@/pages/Admin/Columns/InterfaceInfoColumns";
+import ModalForm from "@/pages/Admin/Components/ModalForm";
 
 /**
  * @en-US Update node
@@ -84,6 +64,29 @@ const InterfaceInfoList: React.FC = () => {
   const [selectedRowsState, setSelectedRows] = useState<API.RuleListItem[]>([]);
   const [loading, setLoading] = useState<boolean>(false)
   const [modalOpen, setModalOpen] = useState<boolean>(false);
+
+  /**
+   * @en-US Add node
+   * @zh-CN 添加节点
+   * @param fields
+   */
+  const handleAdd = async (fields: API.InterfaceInfoAddRequest) => {
+    const hide = message.loading('正在添加');
+    try {
+      const res = await addInterfaceInfoUsingPost({
+        ...fields,
+      });
+      if (res.code === 0 && res.data){
+        hide();
+        message.success('添加成功');
+      }
+      return true;
+    } catch (error:any) {
+      hide();
+      message.error('添加失败',error.message);
+      return false;
+    }
+  };
 
   /**
    *  Delete node
@@ -296,12 +299,15 @@ const InterfaceInfoList: React.FC = () => {
         columns={columns}
       />
       <ModalForm
-        title={'新建规则'}
-        width="400px"
-        open={createModalOpen}
+        title={'添加接口'}
+        width={'840px'}
+        value={{}}
+        open={() => {
+          return createModalOpen;
+        }}
         onOpenChange={handleModalOpen}
-        onFinish={async (value) => {
-          const success = await handleAdd(value as API.RuleListItem);
+        onSubmit={async (value) => {
+          const success = await handleAdd(value as API.InterfaceInfo);
           if (success) {
             handleModalOpen(false);
             if (actionRef.current) {
@@ -309,18 +315,9 @@ const InterfaceInfoList: React.FC = () => {
             }
           }
         }}
+        onCancel={() => handleModalOpen(false)}
+        columns={InterfaceInfoModalFormColumns}
       >
-        <ProFormText
-          rules={[
-            {
-              required: true,
-              message: '规则名称为必填项',
-            },
-          ]}
-          width="md"
-          name="name"
-        />
-        <ProFormTextArea width="md" name="desc" />
       </ModalForm>
       <UpdateForm
         onSubmit={async (value) => {

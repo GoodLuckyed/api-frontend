@@ -169,7 +169,7 @@ declare namespace API {
     total?: number;
   };
 
-  type RequestParamsField = {
+  type  RequestParamsField = {
     desc?: string;
     fieldName?: string;
     id?: string;
