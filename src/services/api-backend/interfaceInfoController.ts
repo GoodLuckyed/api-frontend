@@ -136,3 +136,18 @@ export async function onlineInterfaceInfoUsingPost(
     ...(options || {}),
   });
 }
+
+/** 更新接口信息 POST /api/interface/update */
+export async function updateInterInfoUsingPost(
+  body: API.InterfaceInfoUpdateRequest,
+  options?: { [key: string]: any },
+) {
+  return request<API.BaseResponseboolean>('/api/interface/update', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    data: body,
+    ...(options || {}),
+  });
+}

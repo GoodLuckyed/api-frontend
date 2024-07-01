@@ -7,7 +7,7 @@ export type Props = {
   title: string;
   open: () => boolean;
   width: string;
-  value: API.InterfaceInfo
+  value?: API.InterfaceInfo
   onCancel: () => void;
   columns: any[];
   onSubmit: (values: API.InterfaceInfo) => Promise<void>;
@@ -25,6 +25,7 @@ const ModalForm: React.FC<Props> = (props) => {
       formRef.current?.resetFields();
     }
     if (formRef && isAdd){
+      formRef.current?.resetFields(); // 防止请求参数有缓存
       formRef.current?.setFieldsValue(value);
     }
   }, [value]);

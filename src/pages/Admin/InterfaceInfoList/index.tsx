@@ -18,34 +18,10 @@ import {
   addInterfaceInfoUsingPost,
   delInterfaceInfoUsingPost,
   listInterfaceInfoByPageUsingGet, offlineInterfaceInfoUsingPost,
-  onlineInterfaceInfoUsingPost
+  onlineInterfaceInfoUsingPost, updateInterInfoUsingPost
 } from "@/services/api-backend/interfaceInfoController";
 import InterfaceInfoColumns, {InterfaceInfoModalFormColumns} from "@/pages/Admin/Columns/InterfaceInfoColumns";
 import ModalForm from "@/pages/Admin/Components/ModalForm";
-
-/**
- * @en-US Update node
- * @zh-CN 更新节点
- *
- * @param fields
- */
-const handleUpdate = async (fields: FormValueType) => {
-  const hide = message.loading('Configuring');
-  try {
-    await updateRule({
-      name: fields.name,
-      desc: fields.desc,
-      key: fields.key,
-    });
-    hide();
-    message.success('Configuration is successful');
-    return true;
-  } catch (error) {
-    hide();
-    message.error('Configuration failed, please try again!');
-    return false;
-  }
-};
 
 const InterfaceInfoList: React.FC = () => {
   /**
@@ -84,6 +60,49 @@ const InterfaceInfoList: React.FC = () => {
     } catch (error:any) {
       hide();
       message.error('添加失败',error.message);
+      return false;
+    }
+  };
+
+  /**
+   * @en-US Update node
+   * @zh-CN 更新节点
+   *
+   * @param fields
+   */
+  const handleUpdate = async (fields: API.InterfaceInfoUpdateRequest) => {
+    const hide = message.loading('修改中');
+    try {
+      if (fields){
+        if (fields.requestParams){
+          if (typeof fields.requestParams === "string") {
+            const parseValue = JSON.parse(fields.requestParams);
+            fields.requestParams = [...parseValue]
+          }
+        }else {
+          fields.requestParams = [];
+        }
+        if (fields.responseParams){
+          if (typeof fields.responseParams === "string") {
+            const parseValue = JSON.parse(fields.responseParams);
+            fields.responseParams = [...parseValue]
+          }
+        }else {
+          fields.responseParams = [];
+        }
+      }
+      const res = await updateInterInfoUsingPost({
+        id: currentRow?.id,
+        ...fields
+      })
+      if (res.code === 0 && res.data){
+        hide();
+        message.success('修改成功');
+      }
+      return true;
+    } catch (error:any) {
+      hide();
+      message.error('修改失败', error.message);
       return false;
     }
   };
@@ -249,7 +268,7 @@ const InterfaceInfoList: React.FC = () => {
           key="upload"
           onClick={async () => {
             setCurrentRow(record);
-            setModalOpen(true)
+            setModalOpen(true);
           }}
         >
           更新图片
@@ -307,7 +326,7 @@ const InterfaceInfoList: React.FC = () => {
         }}
         onOpenChange={handleModalOpen}
         onSubmit={async (value) => {
-          const success = await handleAdd(value as API.InterfaceInfo);
+          const success = await handleAdd(value as API.InterfaceInfoAddRequest);
           if (success) {
             handleModalOpen(false);
             if (actionRef.current) {
@@ -319,50 +338,27 @@ const InterfaceInfoList: React.FC = () => {
         columns={InterfaceInfoModalFormColumns}
       >
       </ModalForm>
-      <UpdateForm
+      <ModalForm
+        title={'修改接口'}
+        width={'840px'}
+        value={currentRow}
+        open={() => {
+          return updateModalOpen;
+        }}
+        onOpenChange={handleUpdateModalOpen}
         onSubmit={async (value) => {
-          const success = await handleUpdate(value);
+          const success = await handleUpdate(value as API.InterfaceInfoUpdateRequest);
           if (success) {
             handleUpdateModalOpen(false);
-            setCurrentRow(undefined);
             if (actionRef.current) {
               actionRef.current.reload();
             }
           }
         }}
-        onCancel={() => {
-          handleUpdateModalOpen(false);
-          if (!showDetail) {
-            setCurrentRow(undefined);
-          }
-        }}
-        updateModalOpen={updateModalOpen}
-        values={currentRow || {}}
-      />
-
-      <Drawer
-        width={600}
-        open={showDetail}
-        onClose={() => {
-          setCurrentRow(undefined);
-          setShowDetail(false);
-        }}
-        closable={false}
+        onCancel={() => handleUpdateModalOpen(false)}
+        columns={InterfaceInfoModalFormColumns}
       >
-        {currentRow?.name && (
-          <ProDescriptions<API.RuleListItem>
-            column={2}
-            title={currentRow?.name}
-            request={async () => ({
-              data: currentRow || {},
-            })}
-            params={{
-              id: currentRow?.name,
-            }}
-            columns={columns as ProDescriptionsItemProps<API.RuleListItem>[]}
-          />
-        )}
-      </Drawer>
+      </ModalForm>
     </PageContainer>
   );
 };

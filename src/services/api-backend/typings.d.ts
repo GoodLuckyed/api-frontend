@@ -101,6 +101,23 @@ declare namespace API {
     url?: string;
   };
 
+  type InterfaceInfoUpdateRequest = {
+    avatarUrl?: string;
+    description?: string;
+    id?: number;
+    method?: string;
+    name?: string;
+    reduceScore?: number;
+    requestExample?: string;
+    requestHeader?: string;
+    requestParams?: RequestParamsField[];
+    responseHeader?: string;
+    responseParams?: ResponseParamsField[];
+    returnFormat?: string;
+    status?: number;
+    url?: string;
+  };
+
   type InvokeRequest = {
     id?: number;
     requestParams?: Field[];
@@ -169,7 +186,7 @@ declare namespace API {
     total?: number;
   };
 
-  type  RequestParamsField = {
+  type RequestParamsField = {
     desc?: string;
     fieldName?: string;
     id?: string;
