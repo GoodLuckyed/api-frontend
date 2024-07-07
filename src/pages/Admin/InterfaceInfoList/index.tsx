@@ -1,28 +1,23 @@
-import { addRule, removeRule, rule, updateRule } from '@/services/ant-design-pro/api';
 import { PlusOutlined } from '@ant-design/icons';
-import type { ActionType, ProColumns, ProDescriptionsItemProps } from '@ant-design/pro-components';
-import {
-  FooterToolbar,
-  PageContainer,
-  ProDescriptions,
-  ProFormText,
-  ProFormTextArea,
-  ProTable,
-} from '@ant-design/pro-components';
+import type { ActionType, ProColumns } from '@ant-design/pro-components';
+import { PageContainer, ProTable } from '@ant-design/pro-components';
 import '@umijs/max';
-import {Button, Drawer, Input, message, Popconfirm} from 'antd';
+import { Button, message, Popconfirm } from 'antd';
 import React, { useRef, useState } from 'react';
-import type { FormValueType } from '../UpdateForm';
-import UpdateForm from '../UpdateForm';
 import {
   addInterfaceInfoUsingPost,
   delInterfaceInfoUsingPost,
-  listInterfaceInfoByPageUsingGet, offlineInterfaceInfoUsingPost,
-  onlineInterfaceInfoUsingPost, updateInterInfoUsingPost, uploadAvatarUrlUsingPost
-} from "@/services/api-backend/interfaceInfoController";
-import InterfaceInfoColumns, {InterfaceInfoModalFormColumns} from "@/pages/Admin/Columns/InterfaceInfoColumns";
-import ModalForm from "@/pages/Admin/Components/ModalForm";
-import UploadModal from "@/components/UploadModal";
+  listInterfaceInfoByPageUsingGet,
+  offlineInterfaceInfoUsingPost,
+  onlineInterfaceInfoUsingPost,
+  updateInterInfoUsingPost,
+  uploadAvatarUrlUsingPost,
+} from '@/services/api-backend/interfaceInfoController';
+import InterfaceInfoColumns, {
+  InterfaceInfoModalFormColumns,
+} from '@/pages/Admin/Columns/InterfaceInfoColumns';
+import ModalForm from '@/pages/Admin/Components/ModalForm';
+import UploadModal from '@/components/UploadModal';
 
 const InterfaceInfoList: React.FC = () => {
   /**
@@ -35,11 +30,9 @@ const InterfaceInfoList: React.FC = () => {
    * @zh-CN 分布更新窗口的弹窗
    * */
   const [updateModalOpen, handleUpdateModalOpen] = useState<boolean>(false);
-  const [showDetail, setShowDetail] = useState<boolean>(false);
   const actionRef = useRef<ActionType>();
   const [currentRow, setCurrentRow] = useState<API.InterfaceInfo>();
-  const [selectedRowsState, setSelectedRows] = useState<API.RuleListItem[]>([]);
-  const [loading, setLoading] = useState<boolean>(false)
+  const [loading, setLoading] = useState<boolean>(false);
   const [modalOpen, setModalOpen] = useState<boolean>(false);
 
   /**
@@ -53,14 +46,14 @@ const InterfaceInfoList: React.FC = () => {
       const res = await addInterfaceInfoUsingPost({
         ...fields,
       });
-      if (res.code === 0 && res.data){
+      if (res.code === 0 && res.data) {
         hide();
         message.success('添加成功');
       }
       return true;
-    } catch (error:any) {
+    } catch (error: any) {
       hide();
-      message.error('添加失败',error.message);
+      message.error('添加失败', error.message);
       return false;
     }
   };
@@ -74,34 +67,34 @@ const InterfaceInfoList: React.FC = () => {
   const handleUpdate = async (fields: API.InterfaceInfoUpdateRequest) => {
     const hide = message.loading('修改中');
     try {
-      if (fields){
-        if (fields.requestParams){
-          if (typeof fields.requestParams === "string") {
+      if (fields) {
+        if (fields.requestParams) {
+          if (typeof fields.requestParams === 'string') {
             const parseValue = JSON.parse(fields.requestParams);
-            fields.requestParams = [...parseValue]
+            fields.requestParams = [...parseValue];
           }
-        }else {
+        } else {
           fields.requestParams = [];
         }
-        if (fields.responseParams){
-          if (typeof fields.responseParams === "string") {
+        if (fields.responseParams) {
+          if (typeof fields.responseParams === 'string') {
             const parseValue = JSON.parse(fields.responseParams);
-            fields.responseParams = [...parseValue]
+            fields.responseParams = [...parseValue];
           }
-        }else {
+        } else {
           fields.responseParams = [];
         }
       }
       const res = await updateInterInfoUsingPost({
         id: currentRow?.id,
-        ...fields
-      })
-      if (res.code === 0 && res.data){
+        ...fields,
+      });
+      if (res.code === 0 && res.data) {
         hide();
         message.success('修改成功');
       }
       return true;
-    } catch (error:any) {
+    } catch (error: any) {
       hide();
       message.error('修改失败', error.message);
       return false;
@@ -119,15 +112,15 @@ const InterfaceInfoList: React.FC = () => {
     if (!record) return true;
     try {
       const res = await delInterfaceInfoUsingPost({
-        id: record.id
-      })
-      if (res.data){
+        id: record.id,
+      });
+      if (res.data) {
         hide();
         message.success('删除成功');
         actionRef.current?.reload();
       }
       return true;
-    } catch (error:any) {
+    } catch (error: any) {
       hide();
       message.error('删除失败', error.message);
       return false;
@@ -143,57 +136,57 @@ const InterfaceInfoList: React.FC = () => {
     if (!record) return true;
     try {
       const res = await onlineInterfaceInfoUsingPost({
-        id: record.id
-      })
+        id: record.id,
+      });
       hide();
       if (res.data) {
         message.success('发布成功');
         actionRef.current?.reload();
       }
       return true;
-    } catch (error:any) {
+    } catch (error: any) {
       hide();
-      message.error(error.message)
+      message.error(error.message);
       return false;
     }
-  }
+  };
 
   /**
    * 下线接口
    * @param record
    */
-  const handleOffline = async (record:API.IdRequest) => {
+  const handleOffline = async (record: API.IdRequest) => {
     const hide = message.loading('下线中');
     if (!record) return true;
     try {
       const res = await offlineInterfaceInfoUsingPost({
-        id: record.id
-      })
+        id: record.id,
+      });
       hide();
       if (res.data) {
         message.success('下线成功');
         actionRef.current?.reload();
       }
       return true;
-    } catch (error:any) {
+    } catch (error: any) {
       hide();
-      message.error(error.message)
+      message.error(error.message);
       return false;
     }
-  }
+  };
 
   /**
    * 上传接口图片
    * @param url
    */
-  const handleUpdateAvatar = async (url:any) => {
+  const handleUpdateAvatar = async (url: any) => {
     const hide = message.loading('上传中');
     if (!url) return true;
     try {
       const res = await uploadAvatarUrlUsingPost({
         id: currentRow?.id,
-        avatarUrl: url
-      })
+        avatarUrl: url,
+      });
       hide();
       if (res.data && res.code === 0) {
         message.success('上传成功');
@@ -201,22 +194,22 @@ const InterfaceInfoList: React.FC = () => {
         setModalOpen(false);
       }
       return true;
-    } catch (error:any) {
+    } catch (error: any) {
       hide();
-      message.error('上传失败',error.message)
+      message.error('上传失败', error.message);
       return false;
     }
-  }
+  };
 
   // 确认删除
   const onConfirm = async () => {
-    await handleRemove(currentRow as API.InterfaceInfo)
-  }
+    await handleRemove(currentRow as API.InterfaceInfo);
+  };
 
   // 取消删除
   const onCancel = () => {
-    message.warning('已取消删除')
-  }
+    message.warning('已取消删除');
+  };
 
   /**
    * @en-US International configuration
@@ -363,8 +356,7 @@ const InterfaceInfoList: React.FC = () => {
         }}
         onCancel={() => handleModalOpen(false)}
         columns={InterfaceInfoModalFormColumns}
-      >
-      </ModalForm>
+      ></ModalForm>
       <ModalForm
         title={'修改接口'}
         width={'840px'}
@@ -384,16 +376,14 @@ const InterfaceInfoList: React.FC = () => {
         }}
         onCancel={() => handleUpdateModalOpen(false)}
         columns={InterfaceInfoModalFormColumns}
-      >
-      </ModalForm>
+      ></ModalForm>
       <UploadModal
         title={'上传接口图片'}
         open={modalOpen}
         url={currentRow?.avatarUrl}
         onCancel={() => setModalOpen(false)}
         onSubmit={handleUpdateAvatar}
-      >
-      </UploadModal>
+      ></UploadModal>
     </PageContainer>
   );
 };
