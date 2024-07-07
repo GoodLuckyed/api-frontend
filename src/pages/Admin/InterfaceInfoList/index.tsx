@@ -18,10 +18,11 @@ import {
   addInterfaceInfoUsingPost,
   delInterfaceInfoUsingPost,
   listInterfaceInfoByPageUsingGet, offlineInterfaceInfoUsingPost,
-  onlineInterfaceInfoUsingPost, updateInterInfoUsingPost
+  onlineInterfaceInfoUsingPost, updateInterInfoUsingPost, uploadAvatarUrlUsingPost
 } from "@/services/api-backend/interfaceInfoController";
 import InterfaceInfoColumns, {InterfaceInfoModalFormColumns} from "@/pages/Admin/Columns/InterfaceInfoColumns";
 import ModalForm from "@/pages/Admin/Components/ModalForm";
+import UploadModal from "@/components/UploadModal";
 
 const InterfaceInfoList: React.FC = () => {
   /**
@@ -181,6 +182,32 @@ const InterfaceInfoList: React.FC = () => {
     }
   }
 
+  /**
+   * 上传接口图片
+   * @param url
+   */
+  const handleUpdateAvatar = async (url:any) => {
+    const hide = message.loading('上传中');
+    if (!url) return true;
+    try {
+      const res = await uploadAvatarUrlUsingPost({
+        id: currentRow?.id,
+        avatarUrl: url
+      })
+      hide();
+      if (res.data && res.code === 0) {
+        message.success('上传成功');
+        actionRef.current?.reload();
+        setModalOpen(false);
+      }
+      return true;
+    } catch (error:any) {
+      hide();
+      message.error('上传失败',error.message)
+      return false;
+    }
+  }
+
   // 确认删除
   const onConfirm = async () => {
     await handleRemove(currentRow as API.InterfaceInfo)
@@ -271,7 +298,7 @@ const InterfaceInfoList: React.FC = () => {
             setModalOpen(true);
           }}
         >
-          更新图片
+          上传图片
         </a>,
       ],
     },
@@ -359,6 +386,14 @@ const InterfaceInfoList: React.FC = () => {
         columns={InterfaceInfoModalFormColumns}
       >
       </ModalForm>
+      <UploadModal
+        title={'上传接口图片'}
+        open={modalOpen}
+        url={currentRow?.avatarUrl}
+        onCancel={() => setModalOpen(false)}
+        onSubmit={handleUpdateAvatar}
+      >
+      </UploadModal>
     </PageContainer>
   );
 };

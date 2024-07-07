@@ -151,3 +151,18 @@ export async function updateInterInfoUsingPost(
     ...(options || {}),
   });
 }
+
+/** 上传接口图片url POST /api/interface/uploadAvatar */
+export async function uploadAvatarUrlUsingPost(
+  // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
+  params: API.uploadAvatarUrlUsingPOSTParams,
+  options?: { [key: string]: any },
+) {
+  return request<API.BaseResponseboolean>('/api/interface/uploadAvatar', {
+    method: 'POST',
+    params: {
+      ...params,
+    },
+    ...(options || {}),
+  });
+}

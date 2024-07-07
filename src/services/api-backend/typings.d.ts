@@ -5,6 +5,12 @@ declare namespace API {
     message?: string;
   };
 
+  type BaseResponseImageVo = {
+    code?: number;
+    data?: ImageVo;
+    message?: string;
+  };
+
   type BaseResponseInterfaceInfo = {
     code?: number;
     data?: InterfaceInfo;
@@ -63,6 +69,13 @@ declare namespace API {
 
   type IdRequest = {
     id?: number;
+  };
+
+  type ImageVo = {
+    name?: string;
+    status?: string;
+    uid?: string;
+    url?: string;
   };
 
   type InterfaceInfo = {
@@ -199,6 +212,15 @@ declare namespace API {
     fieldName?: string;
     id?: string;
     type?: string;
+  };
+
+  type uploadAvatarUrlUsingPOSTParams = {
+    avatarUrl?: string;
+    id?: number;
+  };
+
+  type uploadFileUsingPOSTParams = {
+    biz?: string;
   };
 
   type UserLoginRequest = {
