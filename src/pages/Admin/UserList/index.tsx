@@ -4,20 +4,20 @@ import { PageContainer, ProTable } from '@ant-design/pro-components';
 import '@umijs/max';
 import { Button, message, Popconfirm } from 'antd';
 import React, { useRef, useState } from 'react';
-import {
-  addInterfaceInfoUsingPost,
-  delInterfaceInfoUsingPost,
-  listInterfaceInfoByPageUsingGet,
-  offlineInterfaceInfoUsingPost,
-  onlineInterfaceInfoUsingPost,
-  updateInterInfoUsingPost,
-  uploadAvatarUrlUsingPost,
-} from '@/services/api-backend/interfaceInfoController';
-import InterfaceInfoColumns, {
-  InterfaceInfoModalFormColumns,
-} from '@/pages/Admin/Columns/InterfaceInfoColumns';
 import ModalForm from '@/pages/Admin/Components/ModalForm';
-import UploadModal from '@/components/UploadModal';
+import {
+  addUserUsingPost,
+  banUserUsingPost,
+  deleteUserUsingPost,
+  listUserByPageUsingGet,
+  normalUserUsingPost,
+  updateUserUsingPost,
+} from '@/services/api-backend/userController';
+import {
+  UserAddModalFormColumns,
+  UserColumns,
+  UserUpdateModalFormColumns,
+} from '@/pages/Admin/Columns/UserColumns';
 
 const InterfaceInfoList: React.FC = () => {
   /**
@@ -33,17 +33,16 @@ const InterfaceInfoList: React.FC = () => {
   const actionRef = useRef<ActionType>();
   const [currentRow, setCurrentRow] = useState<API.InterfaceInfo>();
   const [loading, setLoading] = useState<boolean>(false);
-  const [modalOpen, setModalOpen] = useState<boolean>(false);
 
   /**
    * @en-US Add node
    * @zh-CN 添加节点
    * @param fields
    */
-  const handleAdd = async (fields: API.InterfaceInfoAddRequest) => {
+  const handleAdd = async (fields: API.UserAddRequest) => {
     const hide = message.loading('正在添加');
     try {
-      const res = await addInterfaceInfoUsingPost({
+      const res = await addUserUsingPost({
         ...fields,
       });
       if (res.code === 0 && res.data) {
@@ -64,28 +63,11 @@ const InterfaceInfoList: React.FC = () => {
    *
    * @param fields
    */
-  const handleUpdate = async (fields: API.InterfaceInfoUpdateRequest) => {
+  const handleUpdate = async (fields: API.UserUpdateRequest) => {
     const hide = message.loading('修改中');
+    console.log("fields",fields)
     try {
-      if (fields) {
-        if (fields.requestParams) {
-          if (typeof fields.requestParams === 'string') {
-            const parseValue = JSON.parse(fields.requestParams);
-            fields.requestParams = [...parseValue];
-          }
-        } else {
-          fields.requestParams = [];
-        }
-        if (fields.responseParams) {
-          if (typeof fields.responseParams === 'string') {
-            const parseValue = JSON.parse(fields.responseParams);
-            fields.responseParams = [...parseValue];
-          }
-        } else {
-          fields.responseParams = [];
-        }
-      }
-      const res = await updateInterInfoUsingPost({
+      const res = await updateUserUsingPost({
         id: currentRow?.id,
         ...fields,
       });
@@ -105,13 +87,13 @@ const InterfaceInfoList: React.FC = () => {
    *  Delete node
    * @zh-CN 删除节点
    *
-   * @param selectedRows
+   * @param record
    */
-  const handleRemove = async (record: API.InterfaceInfo) => {
+  const handleRemove = async (record: API.UserVo) => {
     const hide = message.loading('正在删除');
     if (!record) return true;
     try {
-      const res = await delInterfaceInfoUsingPost({
+      const res = await deleteUserUsingPost({
         id: record.id,
       });
       if (res.data) {
@@ -128,19 +110,19 @@ const InterfaceInfoList: React.FC = () => {
   };
 
   /**
-   * 发布接口
+   * 解封
    * @param record
    */
-  const handleOnline = async (record: API.IdRequest) => {
-    const hide = message.loading('发布中');
+  const handleNormalUser = async (record: API.IdRequest) => {
+    const hide = message.loading('解封中');
     if (!record) return true;
     try {
-      const res = await onlineInterfaceInfoUsingPost({
+      const res = await normalUserUsingPost({
         id: record.id,
       });
       hide();
       if (res.data) {
-        message.success('发布成功');
+        message.success('解封成功');
         actionRef.current?.reload();
         return true;
       }
@@ -152,58 +134,32 @@ const InterfaceInfoList: React.FC = () => {
   };
 
   /**
-   * 下线接口
+   * 封号
    * @param record
    */
-  const handleOffline = async (record: API.IdRequest) => {
-    const hide = message.loading('下线中');
+  const handBanUser = async (record: API.IdRequest) => {
+    const hide = message.loading('封号中');
     if (!record) return true;
     try {
-      const res = await offlineInterfaceInfoUsingPost({
+      const res = await banUserUsingPost({
         id: record.id,
       });
       hide();
       if (res.data) {
-        message.success('下线成功');
+        message.success('封号成功');
         actionRef.current?.reload();
         return true;
       }
     } catch (error: any) {
       hide();
       message.error(error.message);
-      return false;
-    }
-  };
-
-  /**
-   * 上传接口图片
-   * @param url
-   */
-  const handleUpdateAvatar = async (url: any) => {
-    const hide = message.loading('上传中');
-    if (!url) return true;
-    try {
-      const res = await uploadAvatarUrlUsingPost({
-        id: currentRow?.id,
-        avatarUrl: url,
-      });
-      hide();
-      if (res.data && res.code === 0) {
-        message.success('上传成功');
-        actionRef.current?.reload();
-        setModalOpen(false);
-        return true;
-      }
-    } catch (error: any) {
-      hide();
-      message.error('上传失败', error.message);
       return false;
     }
   };
 
   // 确认删除
   const onConfirm = async () => {
-    await handleRemove(currentRow as API.InterfaceInfo);
+    await handleRemove(currentRow as API.UserVo);
   };
 
   // 取消删除
@@ -216,8 +172,8 @@ const InterfaceInfoList: React.FC = () => {
    * @zh-CN 国际化配置
    * */
 
-  const columns: ProColumns<API.InterfaceInfo>[] = [
-    ...InterfaceInfoColumns,
+  const columns: ProColumns<API.UserVo>[] = [
+    ...UserColumns,
     {
       title: '操作',
       dataIndex: 'option',
@@ -232,43 +188,32 @@ const InterfaceInfoList: React.FC = () => {
         >
           修改
         </a>,
-        record.status === 2 ? (
+        record.status === 1 ? (
           <a
-            key="auditing"
+            key="normal"
             type={'text'}
             onClick={() => {
-              handleOnline(record);
+              handleNormalUser(record);
             }}
           >
-            审核通过
+            解封
           </a>
         ) : null,
         record.status === 0 ? (
           <a
-            key="online"
-            type={'text'}
-            onClick={() => {
-              handleOnline(record);
-            }}
-          >
-            上线
-          </a>
-        ) : null,
-        record.status === 1 ? (
-          <a
-            key="offline"
+            key="ban"
             type={'text'}
             style={{ color: 'red' }}
             onClick={() => {
-              handleOffline(record);
+              handBanUser(record);
             }}
           >
-            下线
+            封号
           </a>
         ) : null,
         <Popconfirm
           key={'delete'}
-          title={'请确认是否删除该接口!'}
+          title={'请确认是否删除该用户!'}
           okText="是"
           cancelText="否"
           onConfirm={onConfirm}
@@ -284,24 +229,15 @@ const InterfaceInfoList: React.FC = () => {
             删除
           </a>
         </Popconfirm>,
-        <a
-          key="upload"
-          onClick={async () => {
-            setCurrentRow(record);
-            setModalOpen(true);
-          }}
-        >
-          上传图片
-        </a>,
       ],
     },
   ];
   return (
     <PageContainer>
-      <ProTable<API.InterfaceInfo>
-        headerTitle={'接口管理'}
+      <ProTable<API.UserVo>
+        headerTitle={'用户管理'}
         actionRef={actionRef}
-        rowKey="key"
+        rowKey="user"
         loading={loading}
         search={{
           labelWidth: 120,
@@ -319,8 +255,10 @@ const InterfaceInfoList: React.FC = () => {
         ]}
         request={async (params) => {
           setLoading(true);
-          const res = await listInterfaceInfoByPageUsingGet({
+          const res = await listUserByPageUsingGet({
             ...params,
+            sortField: 'updateTime',
+            sortOrder: 'descend',
           });
           if (res?.data) {
             setLoading(false);
@@ -340,7 +278,7 @@ const InterfaceInfoList: React.FC = () => {
         columns={columns}
       />
       <ModalForm
-        title={'添加接口'}
+        title={'添加用户'}
         width={'840px'}
         value={{}}
         open={() => {
@@ -348,7 +286,7 @@ const InterfaceInfoList: React.FC = () => {
         }}
         onOpenChange={handleModalOpen}
         onSubmit={async (value) => {
-          const success = await handleAdd(value as API.InterfaceInfoAddRequest);
+          const success = await handleAdd(value as API.UserAddRequest);
           if (success) {
             handleModalOpen(false);
             if (actionRef.current) {
@@ -357,10 +295,10 @@ const InterfaceInfoList: React.FC = () => {
           }
         }}
         onCancel={() => handleModalOpen(false)}
-        columns={InterfaceInfoModalFormColumns}
+        columns={UserAddModalFormColumns}
       ></ModalForm>
       <ModalForm
-        title={'修改接口'}
+        title={'修改用户信息'}
         width={'840px'}
         value={currentRow}
         open={() => {
@@ -368,7 +306,7 @@ const InterfaceInfoList: React.FC = () => {
         }}
         onOpenChange={handleUpdateModalOpen}
         onSubmit={async (value) => {
-          const success = await handleUpdate(value as API.InterfaceInfoUpdateRequest);
+          const success = await handleUpdate(value as API.UserUpdateRequest);
           if (success) {
             handleUpdateModalOpen(false);
             if (actionRef.current) {
@@ -377,15 +315,8 @@ const InterfaceInfoList: React.FC = () => {
           }
         }}
         onCancel={() => handleUpdateModalOpen(false)}
-        columns={InterfaceInfoModalFormColumns}
+        columns={UserUpdateModalFormColumns}
       ></ModalForm>
-      <UploadModal
-        title={'上传接口图片'}
-        open={modalOpen}
-        url={currentRow?.avatarUrl}
-        onCancel={() => setModalOpen(false)}
-        onSubmit={handleUpdateAvatar}
-      ></UploadModal>
     </PageContainer>
   );
 };

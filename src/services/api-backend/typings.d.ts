@@ -23,6 +23,12 @@ declare namespace API {
     message?: string;
   };
 
+  type BaseResponseListUserVo = {
+    code?: number;
+    data?: UserVo[];
+    message?: string;
+  };
+
   type BaseResponselong = {
     code?: number;
     data?: number;
@@ -38,6 +44,12 @@ declare namespace API {
   type BaseResponsePageInterfaceInfo = {
     code?: number;
     data?: PageInterfaceInfo;
+    message?: string;
+  };
+
+  type BaseResponsePageUserVo = {
+    code?: number;
+    data?: PageUserVo;
     message?: string;
   };
 
@@ -181,6 +193,30 @@ declare namespace API {
     userId?: number;
   };
 
+  type listUserByPageUsingGETParams = {
+    current?: number;
+    gender?: number;
+    id?: number;
+    pageSize?: number;
+    sortField?: string;
+    sortOrder?: string;
+    userAccount?: string;
+    userName?: string;
+    userRole?: string;
+  };
+
+  type listUserUsingGETParams = {
+    current?: number;
+    gender?: number;
+    id?: number;
+    pageSize?: number;
+    sortField?: string;
+    sortOrder?: string;
+    userAccount?: string;
+    userName?: string;
+    userRole?: string;
+  };
+
   type OrderItem = {
     asc?: boolean;
     column?: string;
@@ -194,6 +230,19 @@ declare namespace API {
     orders?: OrderItem[];
     pages?: number;
     records?: InterfaceInfo[];
+    searchCount?: boolean;
+    size?: number;
+    total?: number;
+  };
+
+  type PageUserVo = {
+    countId?: string;
+    current?: number;
+    maxLimit?: number;
+    optimizeCountSql?: boolean;
+    orders?: OrderItem[];
+    pages?: number;
+    records?: UserVo[];
     searchCount?: boolean;
     size?: number;
     total?: number;
@@ -223,6 +272,15 @@ declare namespace API {
     biz?: string;
   };
 
+  type UserAddRequest = {
+    balance?: number;
+    gender?: number;
+    userAccount?: string;
+    userName?: string;
+    userPassword?: string;
+    userRole?: string;
+  };
+
   type UserLoginRequest = {
     userAccount?: string;
     userPassword?: string;
@@ -236,6 +294,17 @@ declare namespace API {
     userPassword?: string;
   };
 
+  type UserUpdateRequest = {
+    avatarUrl?: string;
+    balance?: number;
+    gender?: number;
+    id?: number;
+    userAccount?: string;
+    userName?: string;
+    userPassword?: string;
+    userRole?: string;
+  };
+
   type UserVo = {
     accessKey?: string;
     avatarUrl?: string;
@@ -243,6 +312,7 @@ declare namespace API {
     createTime?: string;
     gender?: number;
     id?: number;
+    invitationCode?: string;
     secretKey?: string;
     status?: number;
     updateTime?: string;
