@@ -23,6 +23,12 @@ declare namespace API {
     message?: string;
   };
 
+  type BaseResponseListProductInfo = {
+    code?: number;
+    data?: ProductInfo[];
+    message?: string;
+  };
+
   type BaseResponseListUserVo = {
     code?: number;
     data?: UserVo[];
@@ -47,9 +53,21 @@ declare namespace API {
     message?: string;
   };
 
+  type BaseResponsePageProductInfo = {
+    code?: number;
+    data?: PageProductInfo;
+    message?: string;
+  };
+
   type BaseResponsePageUserVo = {
     code?: number;
     data?: PageUserVo;
+    message?: string;
+  };
+
+  type BaseResponseProductInfo = {
+    code?: number;
+    data?: ProductInfo;
     message?: string;
   };
 
@@ -75,6 +93,11 @@ declare namespace API {
   };
 
   type getInterfaceInfoUsingGETParams = {
+    /** id */
+    id?: number;
+  };
+
+  type getProductInfoUsingGETParams = {
     /** id */
     id?: number;
   };
@@ -175,6 +198,18 @@ declare namespace API {
     sortOrder?: string;
   };
 
+  type listInterfaceInfoUsingGET1Params = {
+    addPoints?: number;
+    current?: number;
+    description?: string;
+    name?: string;
+    pageSize?: number;
+    productType?: string;
+    sortField?: string;
+    sortOrder?: string;
+    total?: number;
+  };
+
   type listInterfaceInfoUsingGETParams = {
     current?: number;
     description?: string;
@@ -191,6 +226,18 @@ declare namespace API {
     status?: number;
     url?: string;
     userId?: number;
+  };
+
+  type listProductInfoByPageUsingGETParams = {
+    addPoints?: number;
+    current?: number;
+    description?: string;
+    name?: string;
+    pageSize?: number;
+    productType?: string;
+    sortField?: string;
+    sortOrder?: string;
+    total?: number;
   };
 
   type listUserByPageUsingGETParams = {
@@ -235,6 +282,19 @@ declare namespace API {
     total?: number;
   };
 
+  type PageProductInfo = {
+    countId?: string;
+    current?: number;
+    maxLimit?: number;
+    optimizeCountSql?: boolean;
+    orders?: OrderItem[];
+    pages?: number;
+    records?: ProductInfo[];
+    searchCount?: boolean;
+    size?: number;
+    total?: number;
+  };
+
   type PageUserVo = {
     countId?: string;
     current?: number;
@@ -245,6 +305,30 @@ declare namespace API {
     records?: UserVo[];
     searchCount?: boolean;
     size?: number;
+    total?: number;
+  };
+
+  type ProductInfo = {
+    addPoints?: number;
+    createTime?: string;
+    description?: string;
+    expirationTime?: string;
+    id?: number;
+    isDelete?: number;
+    name?: string;
+    productType?: string;
+    status?: number;
+    total?: number;
+    updateTime?: string;
+    userId?: number;
+  };
+
+  type ProductInfoAddRequest = {
+    addPoints?: number;
+    description?: string;
+    expirationTime?: string;
+    name?: string;
+    productType?: string;
     total?: number;
   };
 
@@ -261,6 +345,16 @@ declare namespace API {
     fieldName?: string;
     id?: string;
     type?: string;
+  };
+
+  type updateProductInfoUsingPOSTParams = {
+    addPoints?: number;
+    description?: string;
+    expirationTime?: string;
+    id?: number;
+    name?: string;
+    productType?: string;
+    total?: number;
   };
 
   type uploadAvatarUrlUsingPOSTParams = {

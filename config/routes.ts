@@ -21,6 +21,12 @@ export default [
     hideInMenu: true
   },
   {
+    path: '/recharge/list',
+    name: '购买积分',
+    icon: 'PayCircleOutlined',
+    component: './Recharge',
+  },
+  {
     path: '/admin',
     name: '管理页',
     icon: 'crown',
