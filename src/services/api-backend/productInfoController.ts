@@ -109,15 +109,15 @@ export async function onlineProductInfoUsingPost(
 
 /** 修改产品 POST /api/productInfo/update */
 export async function updateProductInfoUsingPost(
-  // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
-  params: API.updateProductInfoUsingPOSTParams,
+  body: API.ProductInfoUpdateRequest,
   options?: { [key: string]: any },
 ) {
   return request<API.BaseResponseboolean>('/api/productInfo/update', {
     method: 'POST',
-    params: {
-      ...params,
+    headers: {
+      'Content-Type': 'application/json',
     },
+    data: body,
     ...(options || {}),
   });
 }

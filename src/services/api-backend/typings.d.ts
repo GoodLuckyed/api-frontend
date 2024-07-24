@@ -332,6 +332,16 @@ declare namespace API {
     total?: number;
   };
 
+  type ProductInfoUpdateRequest = {
+    addPoints?: number;
+    description?: string;
+    expirationTime?: string;
+    id?: number;
+    name?: string;
+    productType?: string;
+    total?: number;
+  };
+
   type RequestParamsField = {
     desc?: string;
     fieldName?: string;
@@ -345,16 +355,6 @@ declare namespace API {
     fieldName?: string;
     id?: string;
     type?: string;
-  };
-
-  type updateProductInfoUsingPOSTParams = {
-    addPoints?: number;
-    description?: string;
-    expirationTime?: string;
-    id?: number;
-    name?: string;
-    productType?: string;
-    total?: number;
   };
 
   type uploadAvatarUrlUsingPOSTParams = {
