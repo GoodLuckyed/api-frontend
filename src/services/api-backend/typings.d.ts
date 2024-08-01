@@ -11,6 +11,12 @@ declare namespace API {
     message?: string;
   };
 
+  type BaseResponseint = {
+    code?: number;
+    data?: number;
+    message?: string;
+  };
+
   type BaseResponseInterfaceInfo = {
     code?: number;
     data?: InterfaceInfo;
@@ -308,6 +314,11 @@ declare namespace API {
     total?: number;
   };
 
+  type PayCreateRequest = {
+    paymentType?: string;
+    productId?: number;
+  };
+
   type ProductInfo = {
     addPoints?: number;
     createTime?: string;
@@ -355,6 +366,11 @@ declare namespace API {
     fieldName?: string;
     id?: string;
     type?: string;
+  };
+
+  type tradeNotifyUsingPOSTParams = {
+    /** params */
+    params: Record<string, any>;
   };
 
   type uploadAvatarUrlUsingPOSTParams = {

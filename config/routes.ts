@@ -27,6 +27,12 @@ export default [
     component: './Recharge',
   },
   {
+    path: '/order/pay/:id',
+    name: '订单支付',
+    icon: 'PayCircleOutlined',
+    component: './Order/PayOrder',
+  },
+  {
     path: '/admin',
     name: '管理页',
     icon: 'crown',

@@ -53,7 +53,7 @@ export const requestConfig: RequestConfig = {
       if (data && code === 0){
         return response;
       }else {
-
+        return response;
       }
     },
   ],

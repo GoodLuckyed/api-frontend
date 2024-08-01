@@ -4,6 +4,7 @@ import {history, useModel} from '@umijs/max';
 import {Button, Card, message, Spin, Tooltip} from 'antd';
 import React, { useEffect, useState } from 'react';
 import ZuanShi from "@/components/icon/ZuanShi";
+import {getBalanceUsingGet} from "@/services/api-backend/userController";
 
 const Recharge: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(false);
@@ -19,6 +20,17 @@ const Recharge: React.FC = () => {
     if (res.code === 0 && res.data) {
       setProduct(res.data.records || []);
       setLoading(false);
+    }
+    // 实时获取用户余额积分
+    const res1 = await getBalanceUsingGet();
+    if (res1.code === 0 && res1.data){
+      setInitialState({
+        ...initialState,
+        loginUser: {
+          ...loginUser,
+          balance: res1.data
+        }
+      });
     }
   };
 
