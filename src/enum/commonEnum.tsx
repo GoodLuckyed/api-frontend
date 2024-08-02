@@ -51,3 +51,8 @@ export const errorcode = [
     desc: '操作失败',
   },
 ]
+
+export const orderPayTypeEnum: any = {
+  '微信': 'green',
+  '支付宝': 'blue',
+};

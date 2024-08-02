@@ -53,9 +53,21 @@ declare namespace API {
     message?: string;
   };
 
+  type BaseResponseOrderInfo = {
+    code?: number;
+    data?: OrderInfo;
+    message?: string;
+  };
+
   type BaseResponsePageInterfaceInfo = {
     code?: number;
     data?: PageInterfaceInfo;
+    message?: string;
+  };
+
+  type BaseResponsePageOrderInfo = {
+    code?: number;
+    data?: PageOrderInfo;
     message?: string;
   };
 
@@ -89,6 +101,11 @@ declare namespace API {
     message?: string;
   };
 
+  type cancelOrderUsingPOSTParams = {
+    /** orderNo */
+    orderNo: string;
+  };
+
   type DeleteRequest = {
     id?: number;
   };
@@ -99,6 +116,11 @@ declare namespace API {
   };
 
   type getInterfaceInfoUsingGETParams = {
+    /** id */
+    id?: number;
+  };
+
+  type getOrderInfoUsingGETParams = {
     /** id */
     id?: number;
   };
@@ -234,6 +256,19 @@ declare namespace API {
     userId?: number;
   };
 
+  type listOrderByPageUsingPOSTParams = {
+    addPoints?: number;
+    current?: number;
+    orderNo?: string;
+    pageSize?: number;
+    paymentType?: string;
+    sortField?: string;
+    sortOrder?: string;
+    status?: string;
+    title?: string;
+    total?: number;
+  };
+
   type listProductInfoByPageUsingGETParams = {
     addPoints?: number;
     current?: number;
@@ -270,6 +305,23 @@ declare namespace API {
     userRole?: string;
   };
 
+  type OrderInfo = {
+    addPoints?: number;
+    codeUrl?: string;
+    createTime?: string;
+    expirationTime?: string;
+    id?: number;
+    isDelete?: number;
+    orderNo?: string;
+    paymentType?: string;
+    productId?: number;
+    status?: string;
+    title?: string;
+    total?: number;
+    updateTime?: string;
+    userId?: number;
+  };
+
   type OrderItem = {
     asc?: boolean;
     column?: string;
@@ -283,6 +335,19 @@ declare namespace API {
     orders?: OrderItem[];
     pages?: number;
     records?: InterfaceInfo[];
+    searchCount?: boolean;
+    size?: number;
+    total?: number;
+  };
+
+  type PageOrderInfo = {
+    countId?: string;
+    current?: number;
+    maxLimit?: number;
+    optimizeCountSql?: boolean;
+    orders?: OrderItem[];
+    pages?: number;
+    records?: OrderInfo[];
     searchCount?: boolean;
     size?: number;
     total?: number;
