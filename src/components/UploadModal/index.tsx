@@ -11,7 +11,7 @@ export type Props = {
   title: string;
   open: boolean;
   onCancel: () => void;
-  url?: string;
+  url?: string
   onSubmit: (url:any) => Promise<any>;
 }
 const UploadModal: React.FC<Props> = (props) => {

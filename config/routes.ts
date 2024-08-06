@@ -58,7 +58,7 @@ export default [
       { path: '/admin/product/list', name: '产品管理', component: './Admin/ProductInfoList'},
     ],
   },
-  { name: '查询表格', icon: 'table', path: '/list', component: './InterfaceInfo' },
+  // { name: '查询表格', icon: 'table', path: '/list', component: './InterfaceInfo' },
   { path: '/', redirect: '/welcome' },
   { path: '*', layout: false, component: './404' },
 ];
